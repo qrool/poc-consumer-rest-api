@@ -1,0 +1,41 @@
+version: "3.9"
+
+services:
+  dnp-fpm:
+    build:
+      context: ./
+      dockerfile: ./docker/php-fpm/dockerfile
+      args:
+        VERSION: "0.0.1"
+    container_name: dnp-fpm
+    tty: true
+    restart: always
+    ports:
+      - "9000:9000"
+    env_file:
+      - .env.example
+    networks:
+      default:
+        aliases:
+          - dnpnet
+    volumes:
+      - ./:/app
+
+  dnp-nginx:
+    image: nginx:latest
+    restart: always
+    working_dir: /app
+    container_name: dnp-nginx
+    ports:
+      - ${NGINX_HTTP}:80
+      - "443:443"
+    volumes:
+      - ./:/app
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    links:
+      - dnp-fpm
+
+networks:
+  default:
+    driver: bridge
+    name: dnpnet

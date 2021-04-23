@@ -1,0 +1,63 @@
+FROM php:8.0-fpm as dnp-fpm
+
+ENV DEBIAN_FRONTEND="noninteractive"
+
+ARG VERSION
+
+ENV VERSION="${VERSION}"
+
+RUN set -eu; \
+  apt-get update; \
+  apt install -y \
+  git \
+  libzip-dev \
+  zip \
+  curl \
+  bzip2 \
+  ca-certificates \
+  ntpdate \
+  libpq-dev \
+  sqlite3 \
+  postgresql-client \
+  mc \
+  nano;
+
+# Set timezone to UTC by default and use unicode
+RUN set -eu; \
+  ln -sf /usr/share/zoneinfo/Etc/UTC /etc/localtime; \
+  locale-gen C.UTF-8 || true
+ENV LANG="C.UTF-8"
+
+# Install Composer
+RUN set -eu; \
+  php -r "copy('https://raw.githubusercontent.com/composer/getcomposer.org/master/web/installer', 'composer-setup.php');"; \
+  php composer-setup.php; \
+  php -r "unlink('composer-setup.php');"; \
+  mv composer.phar /usr/local/bin/composer;
+ENV COMPOSER_ALLOW_SUPERUSER 1
+
+# Install XDebug
+RUN set -eu; \
+  (pecl install xdebug || pecl install xdebug-2.5.5 || pecl install xdebug-2.7.1); \
+  docker-php-ext-enable xdebug;
+
+RUN  set -eu; \
+  apt-get update; \
+  apt-get install -y --no-install-recommends \
+  libicu-dev \
+  zlib1g-dev \
+  libzip-dev; \
+  rm -rf /var/lib/apt/lists/*; \
+  docker-php-ext-configure intl; \
+  docker-php-ext-install intl; \
+  docker-php-ext-install zip pdo pdo_pgsql; \
+  docker-php-ext-enable opcache;
+
+WORKDIR /app
+
+COPY composer.json  /app/
+
+RUN set -eu; \
+  composer update; \
+  composer install; \
+  composer dump-autoload;
