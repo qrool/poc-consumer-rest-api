@@ -16,7 +16,7 @@ $flatConfig = $config->getConfig();
 switch ($_SERVER['REQUEST_URI']) {
     case '/command/auth/authorise':
 
-        // only implemented to check it can get accessToken
+        // only implemented to check if it can get an accessToken
         $auth = new Auth($flatConfig['auth'], $flatConfig['authStorage']['path']);
         print $auth->getToken();
         break;
@@ -25,15 +25,11 @@ switch ($_SERVER['REQUEST_URI']) {
         echo '/command/posts/process';
 
         // Auth
-        // get Token, usually this would be handled by a middleware
+        // getting authToken, usually this would be handled by a middleware
         $auth = new Auth($flatConfig['auth'], $flatConfig['authStorage']['path']);
         $accessToken = $auth->getToken();
 
         // State
-        /*
-         * TODO: State currently take care about pages only but if the page does not have full list of records
-         * ie. 100 records but 50. This page would needed to be restarted. State currently does not keep info about records per page.
-         */
         $state = new States($flatConfig['storage']['path']);
 
         // Post
@@ -50,7 +46,6 @@ switch ($_SERVER['REQUEST_URI']) {
 
         // API Client
         $ApiClient = new ApiClient();
-        //$ApiClient->setDataOnly(true);
 
         $url = $flatConfig['post']['url'];
         $data = [$flatConfig['auth']['access_token_name'] => $accessToken];
@@ -58,7 +53,7 @@ switch ($_SERVER['REQUEST_URI']) {
         do {
             $data[$counter] = $page++;
 
-            $fetchedPosts = $ApiClient->get($url, $data); // fetch data from the endpoint
+            $fetchedPosts = $ApiClient->get($url, $data); // fetch data from an endpoint
 
             $fetchedRequestID = $fetchedPosts['meta']['request_id'] ?? false;
 
@@ -85,8 +80,8 @@ switch ($_SERVER['REQUEST_URI']) {
     case '/command/posts/aggregate':
         echo '/command/posts/aggregate';
 
-        // TODO: improvement to gathering data by replacing day,week,month,year with scope_from and scope_to
-        // TODO: optimisation would be to get daily aggregated data from aggregated table to generate monthly aggregation
+        // TODO: improvement - to gathering data by replacing day,week,month,year with scope_from and scope_to
+        // TODO: optimisation - to generate monthly aggregation would use daily aggregated data from aggregated table
 
         // Post
         $post = new Posts($flatConfig['storage']['path']);
