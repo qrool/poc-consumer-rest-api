@@ -1,6 +1,6 @@
 {
-    "name": "qrool/docker-nginx-php",
-    "description": "Default setup for prototyping in pure PHP 8 (fpm) using Docker and Nginx web server",
+    "name": "qrool/poc-consumer-rest-api",
+    "description": "Fetching and manipulate fake Json data obtained from REST API. This example is using Docker, Nginx, PHP 8.0 (fpm), Composer and Sqlite to work",
     "type": "project",
     "require": {
         "php": "^8.0",
