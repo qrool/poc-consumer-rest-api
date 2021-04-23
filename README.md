@@ -35,6 +35,60 @@ dnp-nginx    | /docker-entrypoint.sh: Launching /docker-entrypoint.d/20-envsubst
 dnp-nginx    | /docker-entrypoint.sh: Launching /docker-entrypoint.d/30-tune-worker-processes.sh
 dnp-nginx    | /docker-entrypoint.sh: Configuration complete; ready for start up
 ```
+* Now, we need to install our vendors to make the application to work. In separate terminal call this command
+  ```docker exec -it dnp-fpm composer install``` if it does not work then another approach will be:
+  * get containerID by calling ```docker ps```
+  it will look like this
+```
+CONTAINER ID   IMAGE                           COMMAND                  CREATED          STATUS          PORTS                                            NAMES
+6c8bc5c3db26   nginx:latest                    "/docker-entrypoint.…"   11 minutes ago   Up 11 minutes   0.0.0.0:80->80/tcp, 0.0.0.0:443->443/tcp         dnp-nginx
+bafd17c0b929   poc-consumer-rest-api_dnp-fpm   "docker-php-entrypoi…"   11 minutes ago   Up 11 minutes   0.0.0.0:9000->9000/tcp                           dnp-fpm
+```
+then use the container ID allocated to the 'dnp-fpm', under NAME column. 
+ 
+```docker exec -it bafd17c0b929 composer install```
+
+if all goes well, output should be like this below
+```
+No lock file found. Updating dependencies instead of installing from lock file. Use composer update over composer install if you do not have a lock file.
+Loading composer repositories with package information
+Updating dependencies
+Lock file operations: 6 installs, 0 updates, 0 removals
+  - Locking guzzlehttp/guzzle (7.3.0)
+  - Locking guzzlehttp/promises (1.4.1)
+  - Locking guzzlehttp/psr7 (1.8.1)
+  - Locking psr/http-client (1.0.1)
+  - Locking psr/http-message (1.0.1)
+  - Locking ralouphie/getallheaders (3.0.3)
+Writing lock file
+Installing dependencies from lock file (including require-dev)
+Package operations: 6 installs, 0 updates, 0 removals
+  - Installing psr/http-message (1.0.1): Extracting archive
+  - Installing psr/http-client (1.0.1): Extracting archive
+  - Installing ralouphie/getallheaders (3.0.3): Extracting archive
+  - Installing guzzlehttp/psr7 (1.8.1): Extracting archive
+  - Installing guzzlehttp/promises (1.4.1): Extracting archive
+  - Installing guzzlehttp/guzzle (7.3.0): Extracting archive
+2 package suggestions were added by new dependencies, use `composer suggest` to see details.
+Generating autoload files
+1 package you are using is looking for funding.
+Use the `composer fund` command to find out more!
+```
+In your root folder you should get /vendor with all the dependencies.
+
+* To start or stop your containers you can use:
+```
+docker-compose up -d 
+```
+or 
+```
+docker-compose up --build 
+```
+To stop, if the containers are running in the background then 
+```
+docker-compose down
+```
+or press ``` CTRL+C ``` if containers are not running in the background.
 
 ## Setup
 * Sqlite DBs are already created and stored in db/ folder, but you can recreate them using schemas stored in the db/storage.sql
